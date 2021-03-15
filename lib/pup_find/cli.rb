@@ -4,33 +4,28 @@ class CLi
 
     def on_open
         puts banner
-        self.get_zip_input
-        self.get_radius_input
-        #binding.pry
-        Scraper.get_pup_hash(@zip_input, @zip_radius)
+        self.get_input
     end
     
-    def get_zip_input
+    def get_input
         puts "Please enter your 5-digit zip code." 
         z_input = gets.strip
-        if z_input.match?(/[0-9]{5}/) ? @zip_input = z_input : get_zip_input
+        if z_input.match?(/[0-9]{5}/) ? zip_input = z_input : get_input
         end
+        new_search = Scraper.get_pup_hash(zip_input)
+        self.result_menu(new_search)
     end
     
-    def get_radius_input
-        puts "Please enter how far you would like to search, in miles. The maximum number is 500." #need to check validity, and separate
-        r_input = gets.strip
-        if ("1".."500").cover?(r_input) ? @zip_radius = r_input : get_radius_input
-        end
-    end
+    # def get_radius_input ## save for reinstating radius search
+    #     puts "Please enter how far you would like to search, in miles. The maximum number is 500." #need to check validity, and separate
+    #     r_input = gets.strip
+    #     if ("1".."500").cover?(r_input) ? zip_radius = r_input : get_radius_input
+    #     end
+    # end
     
     # save for later for refactoring?
     # def valid_zip_input?(input)
     #     input.match?(/[0-9]{5}/)
-    # end
-    
-    # def valid_radius_input?(input)# between? didn't work because string, but cover? did
-    #     ("1".."500").cover?(input)
     # end
     
     def banner
@@ -42,6 +37,38 @@ class CLi
         puts "* * * * * * * * * * * * * * * * * * *"
     end
 
+    def result_menu(new_search)
+        puts "Here are the available puppies within miles of #{new_search.zip_input}!"
+        puts "#{new_search.name} || #{new_search.breed} || #{new_search.sex} || #{new_search.ageString} old ||" # #{zip_distance}" #spay/neutered? 
+    end
+        #binding.pry
+    #     puts "To refine results, select from criteria: 'breeds' 'age' 'gender'" #write sort
+    #     puts "To get more information about a puppy, enter the number"
+    #     puts "To begin a new query, enter 'restart'"
+    #     puts "To exit, enter 'exit'"
+    #     puts "What would you like to do?"
+    #     #self.result_select
+    
+    # def result_select
+    #     res_response = gets.strip
+    #     if res_response.is_a? Integer 
+    #         find.descrip(result_response) #unless an invalid menu number                 
+    #         elsif result_response == "breeds"
+    #             list_breeds
+    #         elsif result_response == "age"
+    #             list_ages
+    #         elsif result_response == "gender"
+    #             list_genders
+    #         elsif result_response == "restart"
+    #                 start_menu
+    #         elsif result_response == "exit"
+    #                 quit_message
+    #             else
+    #                 puts "Please enter a valid option."
+    #                     #wait 3 seconds
+    #                 result_menu
+    #             end
+    #         end            
 end
     # hello pseudocode! this will be deleted as functionality is added
     #     #RESPONSE = ["breeds", "age", "gender", "restart", "exit"]
