@@ -1,19 +1,24 @@
-class CLi
+ class CLi
+    
+    attr_accessor :name, :breed, :age, :color_id, :picture, :sex, :size, :org_id, :descrip, :website, :zip_input, :zip_radius
 
-    attr_accessor :zip_input, :zip_radius
+    def run
+        on_open
+    end
 
     def on_open
         puts banner
-        self.get_input
+        self.get_data
     end
     
-    def get_input
+    def get_data
         puts "Please enter your 5-digit zip code." 
         z_input = gets.strip
-        if z_input.match?(/[0-9]{5}/) ? zip_input = z_input : get_input
+        if z_input.match?(/[0-9]{5}/) ? zip_input = z_input : get_data
         end
-        new_search = Scraper.get_pup_hash(zip_input)
-        self.result_menu(new_search)
+        pup_search = Scraper.get_pup_hash(zip_input)
+        Puppy.create_from_hash(pup_search)
+        result_menu(zip_input)
     end
     
     # def get_radius_input ## save for reinstating radius search
@@ -37,11 +42,14 @@ class CLi
         puts "* * * * * * * * * * * * * * * * * * *"
     end
 
-    def result_menu(new_search)
-        puts "Here are the available puppies within miles of #{new_search.zip_input}!"
-        puts "#{new_search.name} || #{new_search.breed} || #{new_search.sex} || #{new_search.ageString} old ||" # #{zip_distance}" #spay/neutered? 
+    def result_menu(zipcode)
+        puts "Here are the available puppies within 500 miles of #{zipcode}, sorted by distance!" #zip_input didn't travel all the way through
+        Puppy.all.each do |puppy|
+        puts "#{puppy.name} || #{puppy.breed} || #{puppy.sex} || #{puppy.age} old ||" 
+        end
     end
-        #binding.pry
+
+end
     #     puts "To refine results, select from criteria: 'breeds' 'age' 'gender'" #write sort
     #     puts "To get more information about a puppy, enter the number"
     #     puts "To begin a new query, enter 'restart'"
@@ -69,20 +77,10 @@ class CLi
     #                 result_menu
     #             end
     #         end            
-end
+
     # hello pseudocode! this will be deleted as functionality is added
     #     #RESPONSE = ["breeds", "age", "gender", "restart", "exit"]
     #     # add fixed?, pup_link, organization
-    
-    #     def call
-#         banner
-#         start_menu
-#         result_menu if nav_query_valid
-#         quit_message
-#     end           
-#     def result_menu
-#         puts "Here are the available puppies within #{mile_radius} miles of #{zip_result_response}!"
-#         puts "#{result_index+1}. #{pup_name} || #{pup_breed} || #{pup_gender} || #{pup_age} months || #{zip_distance}" #spay/neutered? ## petfinder doesn't list DOB for age. fuckwads.
 #         puts "To refine results, select from criteria: 'breeds' 'age' 'gender'" #write sort
 #         puts "To get more information about a puppy, enter the number"
 #         puts "To begin a new query, enter 'restart'"
