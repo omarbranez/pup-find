@@ -1,16 +1,14 @@
 class Scraper 
   
-  attr_accessor :name, :breed, :age, :color_id, :picture, :sex, :size, :org_id, :descrip, :website, :zip_input
-  
   def self.get_pup_hash(input)
-    url = "https://api.rescuegroups.org/v5/public/animals/search/available/dogs/?field[animals]=distance&sort=animals.distance"
+    url = "https://api.rescuegroups.org/v5/public/animals/search/available/dogs/?limit=50&field[animals]=distance&sort=animals.distance"
     pup_response = HTTParty.post(url,
     headers: {"Authorization" => APIKEY, "Content-Type" =>"application/vnd.api+json"},
     body: "{\"data\":{\"filters\":[{\"fieldName\":\"animals.ageGroup\",\"operation\":\"equal\",\"criteria\":\"Baby\"},{\"fieldName\":\"animals.birthDate\",\"operation\":\"notblank\"}],\"filterRadius\":{\"miles\":500,\"postalcode\":#{input}}}}"
     ) 
-    pup_array = []
+    puppies = []
     pup_response["data"].each do |pup| # need to check if exists, otherwise will return nomethoderror. see: relationships, and one case of descrip
-      pup_array << temp_hash = {
+      puppies << temp_hash = {
         :name => pup["attributes"]["name"],
         :breed => pup["attributes"]["breedString"],
         :age => pup["attributes"]["ageString"],
@@ -18,12 +16,12 @@ class Scraper
         :sex => pup["attributes"]["sex"],
         :size => pup["attributes"]["sizeGroup"],
         :org_id => (pup["relationships"]["orgs"]["data"].first["id"] if pup["relationships"]["orgs"]),
-        :descrip => (pup["attributes"]["descriptionText"].gsub("&nbsp", " ").gsub(/\n/," ") if pup["attributes"]["descriptionText"]),
+        :descrip => (pup["attributes"]["descriptionText"].gsub("&nbsp", " ").gsub(/\n/," ").gsub("&#39;", "'").gsub(";","") if pup["attributes"]["descriptionText"]), #need to refactor these gsubs
         :website => pup["attributes"]["url"]
       }
-      #binding.pry
+      puppies.first[:user_zip] = input
     end
-    pup_array
+    puppies
   end
 
   def color_hash(input1, input2)
