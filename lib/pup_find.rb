@@ -4,6 +4,7 @@ require 'pry'
 require 'geokit'
 require 'json'
 require 'net/http'
+require 'tty-prompt'
 
 require_relative "./pup_find/version"
 require_relative './pup_find/puppy'

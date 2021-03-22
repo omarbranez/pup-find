@@ -2,4 +2,4 @@
 
 require_relative('../config/environment.rb')
 
-CLi.new.on_open
+CLi.new.run
