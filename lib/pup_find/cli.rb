@@ -1,5 +1,5 @@
 class CLi
-    attr_accessor :result_choice, :bio_choice, :res_choice
+    attr_accessor :result_choice, :bio_choice, :res_choice, :zip_input
     attr_reader :puppy, :user_zip, :prompt
   
     def initialize
@@ -10,22 +10,13 @@ class CLi
     end
    
     def get_data
-        zip_input = @prompt.ask("Please enter your 5-digit zip code.\n") do |zip_valid|
+        @zip_input = @prompt.ask("Please enter your 5-digit zip code.\n") do |zip_valid|
             zip_valid.validate(/[0-9]{5}/)
             zip_valid.messages[:valid?] = 'Invalid zip code. Please enter a valid zip code to continue'
         end
         pup_search = Scraper.get_pup_hash(zip_input) #separate processes?
-        Scraper.get_color_hash
         Puppy.create_puppies(pup_search)
-        #color_pups
         result_menu
-    end
-   
-    def color_pups
-        Puppy.all.each do |puppy|
-            colors = Scraper.get_color_hash
-            puppy.add_pup_colors(colors)
-        end
     end
            
     # def get_radius_input ## save for reinstating radius search
@@ -51,11 +42,11 @@ class CLi
                         
     def result_response
         if @result_choice == 'Enter new Zip Code'
+            Puppy.all.clear
             get_data
         elsif @result_choice == 'Exit PupFind'
             quit_app
         else 
-            binding.pry
             (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio # menu selection is now based on an id number from api
             bio_prompt 
         end
@@ -65,7 +56,6 @@ class CLi
         bio_choice = @prompt.select("Please select from the following options\n", 'Get more information about rescue', 'Return to previous results', 'Exit PupFind')
         case bio_choice 
         when 'Get more information about rescue'
-            binding.pry
             (Puppy.all.find {|pup| pup.id == @result_choice}).rescue_bio
             rescue_prompt
         when 'Return to previous results'
@@ -105,6 +95,5 @@ class CLi
         puts "                         █████ "
         puts "                         ░░░░░ "
     end     
- end
-   
- 
+
+end

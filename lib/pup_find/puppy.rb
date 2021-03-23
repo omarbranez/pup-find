@@ -22,17 +22,7 @@ class Puppy
   end
 
   def to_pup_hash
-    {self.name + " || " + self.breed + " || " + self.sex + " || " + self.age + " old ||"  => self.id}
-    #binding.pry
-  end
-
-  
-  def add_pup_colors(color_hash) # possibly deprecated, pull on pup basis to reduce menu lag just like org
-    color_hash.each do |key, value|
-      if key == self.color_id
-        self.color = value
-      end
-    end
+    {@name + " || " + @breed + " || " + @sex + " || " + @age + " old ||"  => @id}
   end
   
   def self.get_puppies
@@ -44,24 +34,27 @@ class Puppy
     self.all.find{|puppy| puppy.name == name}
   end
   
-  def puppy_bio #nils should be "Unknown" #move to CLI?
+  def puppy_bio #move to CLI?
+    color_data = Scraper.get_color_hash(color_id)
     org_data = Scraper.get_org_hash(org_id)
     puts "***********************************************************************************************************************"
-    puts "Hi, my name is #{self.name}! Woof!"
-    puts "I am a #{self.breed}! I will grow into a #{self.size} sized dog" #make size lower case, make breed first letter capital
+    puts "Hi, my name is #{@name}! Woof!"
+    puts "I am a #{@breed}! I will grow into a #{@size} sized dog!" #make size lower case, make breed first letter capital
     #puts "Based on WhatDog?, I look like a #{whatdog_result}! Makes you think!"
-    puts "I am a #{self.sex}!"
-    puts "I am #{self.age} old!"
-    puts "My colors and markings are #{self.color}!"
-    puts "I am located in #{org_data[2]}, #{org_data[3]}, which is #{self.distance} miles from you!" #resist urge to city/state
-    #puts "You should know that I have the following needs: #{pup_demeanor}" #if, otherwise print none!
+    puts "I am a #{@sex}!"
+    puts "I am #{@age} old!"
+    if @color_id
+      puts "My color and markings are #{color_data[1]}!"
+    else puts "My color and markings are Unlisted"
+    end
+    puts "I am located in #{org_data[2]}, #{org_data[3]}, which is #{@distance} miles from you!" #resist urge to city/state
     #puts "If a price was listed, I am available for #{pup_fee}"
     puts "A little about me:"
-    puts "#{self.descrip}"
-      if self.website
-    puts "You can find more information about me at: #{self.website}"
+    puts "#{@descrip}"
+    if @website
+      puts "You can find more information about me at: #{@website}"
       else puts "Please visit #{org_data[5]} to find more information about me."
-      end
+    end
     puts "***********************************************************************************************************************"
   end
 
@@ -77,6 +70,4 @@ class Puppy
     puts "***********************************************************************************************************************"
   end
 
-  
- end
- 
+end 
