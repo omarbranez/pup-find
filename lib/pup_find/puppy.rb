@@ -26,7 +26,7 @@ class Puppy
   end
   
   def self.get_puppies
-    Scraper.get_pup_hash(zip_input)
+    PupAPI.get_pup_hash(zip_input)
     all
   end
   
@@ -35,8 +35,8 @@ class Puppy
   end
   
   def puppy_bio #move to CLI?
-    color_data = Scraper.get_color_hash(color_id)
-    org_data = Scraper.get_org_hash(org_id)
+    color_data = PupAPI.get_color_hash(color_id)
+    org_data = PupAPI.get_org_hash(org_id)
     puts "***********************************************************************************************************************"
     puts "Hi, my name is #{@name}! Woof!"
     puts "I am a #{@breed}! I will grow into a #{@size} sized dog!" #make size lower case, make breed first letter capital
@@ -59,7 +59,7 @@ class Puppy
   end
 
   def rescue_bio # will probably require a new class of Rescue
-    org_data = Scraper.get_org_hash(org_id)
+    org_data = PupAPI.get_org_hash(org_id)
     puts "***********************************************************************************************************************"
     puts "Rescue Name: #{org_data[1]}" 
     puts "Location: #{org_data[2]}, #{org_data[3]}"

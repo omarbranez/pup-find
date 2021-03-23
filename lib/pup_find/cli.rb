@@ -6,7 +6,12 @@ class CLi
         @prompt = TTY::Prompt.new
         banner
         puts "Welcome to PupFind!"
+        startup
+    end
+
+    def startup    
         get_data
+        create_menu
     end
    
     def get_data
@@ -14,7 +19,10 @@ class CLi
             zip_valid.validate(/[0-9]{5}/)
             zip_valid.messages[:valid?] = 'Invalid zip code. Please enter a valid zip code to continue'
         end
-        pup_search = Scraper.get_pup_hash(zip_input) #separate processes?
+    end
+        
+    def create_menu
+        pup_search = PupAPI.get_pup_hash(zip_input) #separate processes?
         Puppy.create_puppies(pup_search)
         result_menu
     end
@@ -43,7 +51,7 @@ class CLi
     def result_response
         if @result_choice == 'Enter new Zip Code'
             Puppy.all.clear
-            get_data
+            startup
         elsif @result_choice == 'Exit PupFind'
             quit_app
         else 

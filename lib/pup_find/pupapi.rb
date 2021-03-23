@@ -1,4 +1,4 @@
-class Scraper
+class PupAPI
   
   def self.get_pup_hash(input)
     puppies = []
@@ -42,25 +42,23 @@ class Scraper
     org_hash = []
     url = "https://api.rescuegroups.org/v5/public/orgs/#{org}"
     org_response = HTTParty.get(url,
-    headers: {"Authorization" => APIKEY "Content-Type" =>"application/vnd.api+json"})
-    binding.pry
+    headers: {"Authorization" => APIKEY, "Content-Type" =>"application/vnd.api+json"})
     unless org_response["data"] == nil
       org_response["data"].each do |organization| # move to Puppy?
         org_hash << organization["id"]
-        org_hash << organization["attributes"]["name"]
-        org_hash << organization["attributes"]["city"]
-        org_hash << organization["attributes"]["state"]
-        org_hash << organization["attributes"]["email"]
-        org_hash << organization["attributes"]["url"]
-        org_hash << organization["attributes"]["adoptionProcess"]
-        org_hash << organization["attributes"]["about"]
+        org_hash << (organization["attributes"]["name"] ? organization["attributes"]["name"] : "Unknown")
+        org_hash << (organization["attributes"]["city"] ? organization["attributes"]["city"] : "Unknown")
+        org_hash << (organization["attributes"]["state"] ? organization["attributes"]["state"] : "Unknown")
+        org_hash << (organization["attributes"]["email"] ? organization["attributes"]["email"] : "Unknown")
+        org_hash << (organization["attributes"]["url"] ? organization["attributes"]["url"] : "Unknown")
+        org_hash << (organization["attributes"]["adoptionProcess"] ? organization["attributes"]["adoptionProcess"] : "Unknown")
+        org_hash << (organization["attributes"]["about"] ? organization["attributes"]["about"] : "Unknown")
       end
     end
     org_hash
   end
  
- def breed_hash
- end
- 
+  def breed_hash
+  end
  
 end
