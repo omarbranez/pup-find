@@ -1,6 +1,6 @@
 class Puppy
   #take in demeanor attributes? parse socials and emails?
-  attr_accessor :name, :breed, :age, :color_id, :picture, :sex, :size, :org_id, :descrip, :website, :user_zip, :color, :distance, :org_hash
+  attr_accessor :name, :breed, :age, :color_id, :picture, :sex, :size, :org_id, :descrip, :website, :user_zip, :color, :distance, :org_hash, :id
   @@all = []
   
   def initialize(hash)
@@ -21,7 +21,13 @@ class Puppy
     end
   end
 
-  def add_pup_colors(color_hash)
+  def to_pup_hash
+    {self.name + " || " + self.breed + " || " + self.sex + " || " + self.age + " old ||"  => self.id}
+    #binding.pry
+  end
+
+  
+  def add_pup_colors(color_hash) # possibly deprecated, pull on pup basis to reduce menu lag just like org
     color_hash.each do |key, value|
       if key == self.color_id
         self.color = value
@@ -57,9 +63,6 @@ class Puppy
       else puts "Please visit #{org_data[5]} to find more information about me."
       end
     puts "***********************************************************************************************************************"
-    #puts "Type 'info' to receive more information about #{org_data[1]}"
-    puts "Type 'results' to be returned to the previous results."
-    puts "Type 'quit' to leave PupFind."
   end
 
   def rescue_bio # will probably require a new class of Rescue
@@ -72,8 +75,6 @@ class Puppy
     puts "Adoption Process: #{org_data[6]}"
     puts "Rescue Information: #{org_data[7].gsub("&nbsp", " ").gsub(/\n/," ").gsub("&#39;", "'").gsub(";","")}"
     puts "***********************************************************************************************************************"
-    puts "Type 'results' to be returned to the previous results."
-    puts "Type 'quit' to leave PupFind."
   end
 
   

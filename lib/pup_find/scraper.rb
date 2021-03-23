@@ -8,22 +8,23 @@ class Scraper
    body: "{\"data\":{\"filters\":[{\"fieldName\":\"animals.ageGroup\",\"operation\":\"equal\",\"criteria\":\"Baby\"},{\"fieldName\":\"animals.birthDate\",\"operation\":\"notblank\"}],\"filterRadius\":{\"miles\":500,\"postalcode\":#{input}}}}"
    )
    pup_response["data"].each do |pup| # need to check if exists, otherwise will return nomethoderror. see: relationships, and one case of descrip
-     puppies << temp_hash = { #move to Puppy.initialize?
-       :name => pup["attributes"]["name"],
-       :breed => pup["attributes"]["breedString"],
-       :age => pup["attributes"]["ageString"],
-       :color_id => (pup["relationships"]["colors"]["data"].first["id"] if pup["relationships"]["colors"]),
-       :sex => pup["attributes"]["sex"],
-       :size => pup["attributes"]["sizeGroup"],
-       :org_id => (pup["relationships"]["orgs"]["data"].first["id"] if pup["relationships"]["orgs"]),
-       :descrip => (pup["attributes"]["descriptionText"].gsub("&nbsp", " ").gsub(/\n/," ").gsub("&#39;", "'").gsub(";","").gsub("&rs","'") if pup["attributes"]["descriptionText"]), #need to refactor these gsubs
-       :website => pup["attributes"]["url"],
-       :distance => pup["attributes"]["distance"]
-     }
-     puppies.first[:user_zip] = input
-   end
-   puppies
- end
+      puppies << temp_hash = { #move to Puppy.initialize?
+        :id => pup["id"],
+        :name => pup["attributes"]["name"],
+        :breed => pup["attributes"]["breedString"],
+        :age => pup["attributes"]["ageString"],
+        :color_id => (pup["relationships"]["colors"]["data"].first["id"] if pup["relationships"]["colors"]),
+        :sex => pup["attributes"]["sex"],
+        :size => pup["attributes"]["sizeGroup"],
+        :org_id => (pup["relationships"]["orgs"]["data"].first["id"] if pup["relationships"]["orgs"]),
+        :descrip => (pup["attributes"]["descriptionText"].gsub("&nbsp", " ").gsub(/\n/," ").gsub("&#39;", "'").gsub(";","").gsub("&rs","'") if pup["attributes"]["descriptionText"]), #need to refactor these gsubs
+        :website => pup["attributes"]["url"],
+        :distance => pup["attributes"]["distance"]
+        }
+      puppies.first[:user_zip] = input
+    end
+    puppies
+  end
  
  def self.get_color_hash # may be faster if we only pull the ONE color instead of all. 
    color_hash = []

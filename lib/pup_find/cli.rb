@@ -1,25 +1,23 @@
 class CLi
- 
-    attr_reader :puppy, :user_zip
- 
-    def run
-        on_open
-    end
+    attr_accessor :result_choice, :bio_choice, :res_choice
+    attr_reader :puppy, :user_zip, :prompt
   
-    def on_open
-        puts banner
+    def initialize
+        @prompt = TTY::Prompt.new
+        banner
+        puts "Welcome to PupFind!"
         get_data
     end
    
     def get_data
-        puts "Please enter your 5-digit zip code."
-        z_input = gets.strip
-        if z_input.match?(/[0-9]{5}/) ? zip_input = z_input : get_data
+        zip_input = @prompt.ask("Please enter your 5-digit zip code.\n") do |zip_valid|
+            zip_valid.validate(/[0-9]{5}/)
+            zip_valid.messages[:valid?] = 'Invalid zip code. Please enter a valid zip code to continue'
         end
         pup_search = Scraper.get_pup_hash(zip_input) #separate processes?
         Scraper.get_color_hash
         Puppy.create_puppies(pup_search)
-        color_pups
+        #color_pups
         result_menu
     end
    
@@ -42,72 +40,71 @@ class CLi
     #     input.match?(/[0-9]{5}/)
     # end
    
-    def banner
-        puts "* * * * * * * * * * * * * * * * * * *"
-        puts "*                                   *"
-        puts "*       Welcome to PupFind!         *"
-        puts "*     Your new friend awaits!       *"
-        puts "*                                   *"
-        puts "* * * * * * * * * * * * * * * * * * *"
+        
+    def result_menu 
+        @result_choice = 
+        @prompt.select("Here are the available puppies within 500 miles of your zip code sorted by distance! \n Select a puppy to read more information about it!", Puppy.all.map{|pup| pup.to_pup_hash}, 
+                        'Enter new Zip Code', 
+                        'Exit PupFind') ## converted the old menu select to a hash with ONLY the attributes i want to show
+        result_response
     end
-  
-    def result_menu
-        puts "Here are the first 50 available puppies within 500 miles of your zip code, sorted by distance!" #zip_input didn't travel all the way through
-        Puppy.all.each.with_index do |puppy, index|
-            #@prompt.select = "Here are the available puppies within 500 miles of #{zipcode}, sorted by distance!" %w("#{puppy.name} || #{puppy.breed} || #{puppy.sex} || #{puppy.age} old ||")
-        puts "#{index+1}. || #{puppy.name} || #{puppy.breed} || #{puppy.sex} || #{puppy.age} old || #{puppy.distance} miles away"
-        puts "------------------------------------------------------------------------------------------------------------------"
-        end
-        result_prompt
-    end
-  
-    def result_prompt
-        puts "To get more information about a puppy, enter its number"
-        #puts "To refine results, select from criteria: 'breeds' 'age' 'gender'" # need to implement sort
-        puts "To begin a new query, enter 'restart'"
-        puts "To quit, enter 'quit'"
-        input = gets.strip + "." #messes with restart and quit, will implement tty prompt to correct
-        if input == "restart"
-            on_open
-        elsif input == "quit"
+                        
+    def result_response
+        if @result_choice == 'Enter new Zip Code'
+            get_data
+        elsif @result_choice == 'Exit PupFind'
             quit_app
-        elsif !/\A\d+\z/.match(input)
-            Puppy.all[(input.to_i)-1].puppy_bio
-        #elsif input == "breeds"
-            # puts Puppy.all.breed
-        #elsif input == "age"
-            # puts Puppy.all.age
-        #elsif input == "sex"
-            # puts Puppy.all.sex
-        else
-            result_prompt
+        else 
+            binding.pry
+            (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio # menu selection is now based on an id number from api
+            bio_prompt 
         end
-        bio_prompt
     end
   
     def bio_prompt
-        input = gets.strip
-        if input == "results"
-            self.result_menu
-        elsif input == "quit"
-            quit_app
-        else
-            bio_prompt
+        bio_choice = @prompt.select("Please select from the following options\n", 'Get more information about rescue', 'Return to previous results', 'Exit PupFind')
+        case bio_choice 
+        when 'Get more information about rescue'
+            binding.pry
+            (Puppy.all.find {|pup| pup.id == @result_choice}).rescue_bio
+            rescue_prompt
+        when 'Return to previous results'
+            result_menu
+        when 'Exit PupFind'
+            quit_app                
         end
     end
-  
+
+    def rescue_prompt
+        res_choice = @prompt.select("Please select from the following options\n", 'Return to selected puppy', 'Return to previous results', 'Exit PupFind')
+        case res_choice
+        when 'Return to selected puppy'
+            (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio
+            bio_prompt
+        when 'Return to previous results'
+            result_menu
+        when 'Exit PupFind'
+            quit_app     
+        end
+    end
+        
     def quit_app
         puts "Thank you for using PupFind!"   
     end
-   
+    
+    def banner
+        puts "███████████                       ███████████  ███                  █████"
+        puts "░███░░░░░███                      ░███░░░░░░█  ░░                  ░░███ "
+        puts "░███    ░███ █████ ████ ████████  ░███   █ ░  ████  ████████     ███████ "
+        puts "░██████████ ░░███ ░███ ░░███░░███ ░███████   ░░███ ░░███░░███   ███░░███ "
+        puts "░███░░░░░░   ░███ ░███  ░███ ░███ ░███░░░█    ░███  ░███ ░███  ░███ ░███ "
+        puts "░███         ░███ ░███  ░███ ░███ ░███  ░     ░███  ░███ ░███  ░███ ░███ "
+        puts "█████        ░░████████ ░███████  █████       █████ ████ █████░░████████"
+        puts "░░░░░          ░░░░░░░░  ░███░░░  ░░░░░       ░░░░░ ░░░░ ░░░░░  ░░░░░░░░ "
+        puts "                         ░███ "
+        puts "                         █████ "
+        puts "                         ░░░░░ "
+    end     
  end
    
-    # hello pseudocode! this will be deleted as functionality is added
- # #       .-.                     .-.
- # #      (   `-._______________.-'   )
- # #       \                         /
- # #        >= Welcome to PupFind! =<
- # #       /      ______________     \
- # #  jgs (   ,-'`              `'-,  )
- # #       `-'                      `-'
  
