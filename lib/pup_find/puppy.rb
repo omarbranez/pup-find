@@ -1,6 +1,6 @@
 class Puppy
 
-  attr_accessor :name, :breed, :age, :color_id, :picture, :sex, :size, :org_id, :descrip, :website, :user_zip, :color, :distance, :org_hash, :id
+  attr_accessor :name, :breed, :age, :color_id, :sex, :size, :org_id, :descrip, :website, :user_zip, :color, :distance, :org_hash, :id
   @@all = []
   
   def initialize(hash)
@@ -26,9 +26,9 @@ class Puppy
   end
 
   def to_breed_hash
-    {@breed => @id}
+    {@breed + " || " + @name  + " || " + @sex + " || " + @age + " old || " => @id}
   end
-  
+
   def self.get_puppies
     PupAPI.get_pup_hash(zip_input)
     all
@@ -45,7 +45,6 @@ class Puppy
     puts "***********************************************************************************************************************"
     puts "Hi, my name is #{@name}! Woof!"
     puts "I am a #{@breed}! I will grow into a #{@size} sized dog!" 
-    #puts "Based on WhatDog?, I look like a #{whatdog_result}! Makes you think!"
     puts "I am a #{@sex}!"
     puts "I am #{@age} old!"
     if @color_id

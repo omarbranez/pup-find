@@ -1,5 +1,5 @@
 class CLi
-    attr_accessor :result_choice, :bio_choice, :resc_choice, :zip_input, :filter_choice
+    attr_accessor :result_choice, :bio_choice, :resc_choice, :zip_input, :rad_input, :filter_choice
     attr_reader :puppy, :prompt
   
     def initialize
@@ -20,36 +20,29 @@ class CLi
             zip_valid.validate(/[0-9]{5}/)
             zip_valid.messages[:valid?] = 'Invalid zip code. Please enter a valid zip code to continue'
         end
+        clear
+        @rad_input = @prompt.ask("Please enter the maximum search distance (Min. 1, Max 500).\n") do |rad_valid|
+            rad_valid.validate (/^([1-9]|[1-9][0-9]|[1-4][0-9][0-9]|500)$/)
+            rad_valid.messages[:valid?] = 'Invalid search distance. Please enter a number between 1 and 500'
+        end
     end
         
     def create_menu
-        pup_search = PupAPI.get_pup_hash(zip_input) 
+        pup_search = PupAPI.get_pup_hash(zip_input, rad_input) 
         Puppy.create_puppies(pup_search)
         result_menu
     end
-           
-    # def get_radius_input ## save for reinstating radius search
-    #     puts "Please enter how far you would like to search, in miles. The maximum number is 500." #need to check validity, and separate
-    #     r_input = gets.strip
-    #     if ("1".."500").cover?(r_input) ? zip_radius = r_input : get_radius_input
-    #     end
-    # end
-   
-    # save for later for refactoring?
-    # def valid_zip_input?(input)
-    #     input.match?(/[0-9]{5}/)
-    # end
-   
         
     def result_menu 
         clear
         @result_choice = 
-        @prompt.select("Here are the available puppies within 500 miles of #{zip_input} sorted by distance! \n Select a puppy to read more information about it!", Puppy.all.map{|pup| pup.to_pup_hash}, 
+        @prompt.select("Here are up to the first 250 available puppies within #{rad_input} miles of #{zip_input} sorted by distance! \n Select a puppy to read more information about it!", Puppy.all.map{|pup| pup.to_pup_hash}, 
                         'Begin new Zip Code search', 
                         'Filter results by Breed',
                         'Filter results by Size',
                         'Filter results by Rescue Organization',
-                        'Exit PupFind') ## converted the old menu select to a hash with ONLY the attributes i want to show
+                        'Exit PupFind',
+                        per_page: 10) ## converted the old menu select to a hash with ONLY the attributes i want to show
         result_response
     end
                         
@@ -106,7 +99,8 @@ class CLi
     end
     
     def filter_prompt
-        @filter_choice = @prompt.select("Please select from the breeds below, sorted alphabetically\n", ((Puppy.all.map {|pup|pup.to_breed_hash}).sort_by {|breed| breed.first}))
+        @filter_choice = @prompt.select("Please select from the breeds below, sorted alphabetically\n", 
+                ((Puppy.all.map {|pup|pup.to_breed_hash}).sort_by {|breed| breed.first}), per_page: 10)
         (Puppy.all.find {|pup| pup.id == @filter_choice}).puppy_bio
         bio_prompt
     end

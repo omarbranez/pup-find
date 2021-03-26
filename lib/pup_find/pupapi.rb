@@ -1,15 +1,15 @@
 class PupAPI
   
-  def self.get_pup_hash(input)
+  def self.get_pup_hash(z_input, r_input)
     puppies = []
-    url = "https://api.rescuegroups.org/v5/public/animals/search/available/dogs/?limit=50&field[animals]=distance&sort=animals.distance"
+    url = "https://api.rescuegroups.org/v5/public/animals/search/available/dogs/?limit=250&field[animals]=distance&sort=animals.distance"
     pup_response = HTTParty.post(url,
     headers: {"Authorization" => ENV["API_KEY"], "Content-Type" =>"application/vnd.api+json"},
-    body: "{\"data\":{\"filters\":[{\"fieldName\":\"animals.ageGroup\",\"operation\":\"equal\",\"criteria\":\"Baby\"},{\"fieldName\":\"animals.birthDate\",\"operation\":\"notblank\"}],\"filterRadius\":{\"miles\":500,\"postalcode\":#{input}}}}"
+    body: "{\"data\":{\"filters\":[{\"fieldName\":\"animals.ageGroup\",\"operation\":\"equal\",\"criteria\":\"Baby\"},{\"fieldName\":\"animals.birthDate\",\"operation\":\"notblank\"}],\"filterRadius\":{\"miles\":#{r_input},\"postalcode\":#{z_input}}}}"
     )
     if !pup_response["data"] #if data doesn't exist, then an error popped up. the only error possible on our end is a 400 invalid value (for unusued postcode). 
       begin
-        raise ZipError.new(input)
+        raise ZipError.new(z_input)
         puts error.message
       end
     else
@@ -27,9 +27,8 @@ class PupAPI
         :website => pup["attributes"]["url"],
         :distance => pup["attributes"]["distance"]
         }
-      puppies.first[:user_zip] = input
+      end
     end
-  end
     puppies
   end
  
