@@ -4,7 +4,7 @@ class PupAPI
     puppies = []
     url = "https://api.rescuegroups.org/v5/public/animals/search/available/dogs/?limit=50&field[animals]=distance&sort=animals.distance"
     pup_response = HTTParty.post(url,
-    headers: {"Authorization" => APIKEY, "Content-Type" =>"application/vnd.api+json"},
+    headers: {"Authorization" => ENV["API_KEY"], "Content-Type" =>"application/vnd.api+json"},
     body: "{\"data\":{\"filters\":[{\"fieldName\":\"animals.ageGroup\",\"operation\":\"equal\",\"criteria\":\"Baby\"},{\"fieldName\":\"animals.birthDate\",\"operation\":\"notblank\"}],\"filterRadius\":{\"miles\":500,\"postalcode\":#{input}}}}"
     )
     if !pup_response["data"] #if data doesn't exist, then an error popped up. the only error possible on our end is a 400 invalid value (for unusued postcode). 
@@ -37,7 +37,7 @@ class PupAPI
     color_hash = []
     url = "https://api.rescuegroups.org/v5/public/animals/colors/#{clr}"
     color_response = HTTParty.get(url,
-    headers: {"Authorization" => APIKEY, "Content-Type" =>"application/vnd.api+json"})
+    headers: {"Authorization" => ENV["API_KEY"], "Content-Type" =>"application/vnd.api+json"})
     color_response["data"].each do |colors| # move to Puppy?
       color_hash << colors["id"]
       color_hash << colors["attributes"]["name"]
@@ -49,7 +49,7 @@ class PupAPI
     org_hash = []
     url = "https://api.rescuegroups.org/v5/public/orgs/#{org}"
     org_response = HTTParty.get(url,
-    headers: {"Authorization" => APIKEY, "Content-Type" =>"application/vnd.api+json"})
+    headers: {"Authorization" => ENV["API_KEY"], "Content-Type" =>"application/vnd.api+json"})
     unless org_response["data"] == nil
       org_response["data"].each do |organization| # move to Puppy?
         org_hash << organization["id"]

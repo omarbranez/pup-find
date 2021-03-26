@@ -1,7 +1,7 @@
 require 'pry'
 require 'httparty'
 require 'tty-prompt'
-require 'curses'
+require 'dotenv/load'
 
 require_relative('../lib/pup_find/cli.rb')
 require_relative('../lib/pup_find/puppy.rb')
