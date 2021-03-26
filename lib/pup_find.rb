@@ -1,6 +1,7 @@
 require 'pry'
 require 'httparty'
 require 'tty-prompt'
+require 'curses'
 
 
 require_relative "./pup_find/version"

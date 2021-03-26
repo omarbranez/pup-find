@@ -1,5 +1,5 @@
 class Puppy
-  #take in demeanor attributes? parse socials and emails?
+
   attr_accessor :name, :breed, :age, :color_id, :picture, :sex, :size, :org_id, :descrip, :website, :user_zip, :color, :distance, :org_hash, :id
   @@all = []
   
@@ -22,7 +22,11 @@ class Puppy
   end
 
   def to_pup_hash
-    {@name + " || " + @breed + " || " + @sex + " || " + @age + " old ||"  => @id}
+    {@name + " || " + @breed + " || " + @sex + " || " + @age + " old || " + @distance.to_s + " miles away ||" => @id}
+  end
+
+  def to_breed_hash
+    {@breed => @id}
   end
   
   def self.get_puppies
@@ -30,16 +34,17 @@ class Puppy
     all
   end
   
-  def self.find_by_name(name)
-    self.all.find{|puppy| puppy.name == name}
+  def self.find_by_attribute(attribute)
+    self.all.find{|puppy| puppy.attribute == attribute}
   end
-  
+
   def puppy_bio #move to CLI?
-    color_data = PupAPI.get_color_hash(color_id)
+    system "clear"
+    color_data = PupAPI.get_color_hash(color_id)    
     org_data = PupAPI.get_org_hash(org_id)
     puts "***********************************************************************************************************************"
     puts "Hi, my name is #{@name}! Woof!"
-    puts "I am a #{@breed}! I will grow into a #{@size} sized dog!" #make size lower case, make breed first letter capital
+    puts "I am a #{@breed}! I will grow into a #{@size} sized dog!" 
     #puts "Based on WhatDog?, I look like a #{whatdog_result}! Makes you think!"
     puts "I am a #{@sex}!"
     puts "I am #{@age} old!"
@@ -53,12 +58,13 @@ class Puppy
     puts "#{@descrip}"
     if @website
       puts "You can find more information about me at: #{@website}"
-      else puts "Please visit #{org_data[5]} to find more information about me."
+      else puts "Please visit #{org_data[5]} to find more information about me." # at least one puppy didn't have a website, but the rescue had one. i hope a puppy SOMEWHERE isn't lacking both.
     end
     puts "***********************************************************************************************************************"
   end
 
   def rescue_bio # will probably require a new class of Rescue
+    system "clear"
     org_data = PupAPI.get_org_hash(org_id)
     puts "***********************************************************************************************************************"
     puts "Rescue Name: #{org_data[1]}" 

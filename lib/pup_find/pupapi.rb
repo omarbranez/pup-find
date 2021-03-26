@@ -7,6 +7,12 @@ class PupAPI
     headers: {"Authorization" => APIKEY, "Content-Type" =>"application/vnd.api+json"},
     body: "{\"data\":{\"filters\":[{\"fieldName\":\"animals.ageGroup\",\"operation\":\"equal\",\"criteria\":\"Baby\"},{\"fieldName\":\"animals.birthDate\",\"operation\":\"notblank\"}],\"filterRadius\":{\"miles\":500,\"postalcode\":#{input}}}}"
     )
+    if !pup_response["data"] #if data doesn't exist, then an error popped up. the only error possible on our end is a 400 invalid value (for unusued postcode). 
+      begin
+        raise ZipError.new(input)
+        puts error.message
+      end
+    else
     pup_response["data"].each do |pup| 
       puppies << temp_hash = { #move to Puppy.initialize?
         :id => pup["id"],
@@ -23,6 +29,7 @@ class PupAPI
         }
       puppies.first[:user_zip] = input
     end
+  end
     puppies
   end
  
@@ -57,8 +64,19 @@ class PupAPI
     end
     org_hash
   end
- 
-  def breed_hash
+
+  class ZipError < StandardError
+
+    attr_reader :input
+
+    def initialize(input) 
+      @input = input
+    end
+
+    def message
+      "The zip code you have entered is invalid. Please try again."
+    end
+
   end
- 
+
 end
