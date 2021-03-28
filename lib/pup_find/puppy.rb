@@ -1,13 +1,19 @@
 class Puppy
-
-  attr_accessor :name, :breed, :age, :color_id, :sex, :size, :org_id, :descrip, :website, :user_zip, :color, :distance, :org_hash, :id
+  attr_accessor :id, :name, :breed, :age, :color_id, :sex, :size, :org_id, :descrip, :website, :distance, :org, :colors
   @@all = []
   
   def initialize(hash)
-    hash.each do |attribute, value|
-      #self.class.attr_accessor(attribute) #later for refactoring/expansion?
-      self.send("#{attribute}=", value)
-    end
+    @id = hash["id"] 
+    @name = hash["attributes"]["name"]
+    @breed = (hash["attributes"]["breedString"] if hash["attributes"]["breedString"])
+    @age = (hash["attributes"]["ageString"] if hash["attributes"]["ageString"])
+    @color_id = (hash["relationships"]["colors"]["data"].first["id"] if hash["relationships"]["colors"])
+    @sex = (hash["attributes"]["sex"] ? hash["attributes"]["sex"] : "Unknown Sex")
+    @size = (hash["attributes"]["sizeGroup"] ? hash["attributes"]["sizeGroup"] : "Unknown")
+    @org_id = (hash["relationships"]["orgs"]["data"].first["id"] if hash["relationships"]["orgs"])
+    @descrip = (hash["attributes"]["descriptionText"].gsub("&nbsp", "").gsub(/\n/,"").gsub("&#39;", "'").gsub(";","").gsub("&rs","'").strip if hash["attributes"]["descriptionText"]) #need to refactor these gsubs
+    @website = hash["attributes"]["url"]
+    @distance = hash["attributes"]["distance"]
     @@all << self
   end
    
@@ -15,8 +21,8 @@ class Puppy
     @@all
   end
   
-  def self.create_puppies(pup_array)
-    pup_array.each do |puppies|
+  def self.create_puppies(pup_hash)
+    pup_hash.each do |puppies|
       Puppy.new(puppies) 
     end
   end
@@ -26,52 +32,38 @@ class Puppy
   end
 
   def to_breed_hash
-    {@breed + " || " + @name  + " || " + @sex + " || " + @age + " old || " => @id}
+    {@breed + " || " + @name + " || " + @sex + " || " + @age + " old || " + @distance.to_s + " miles away ||" => @id}
   end
 
-  def self.get_puppies
-    PupAPI.get_pup_hash(zip_input)
-    all
-  end
-  
-  def self.find_by_attribute(attribute)
-    self.all.find{|puppy| puppy.attribute == attribute}
+  def to_size_hash
+    {@size + " || " + @breed + " || " + @name + " || " + @sex + " || " + @age + " old || " + @distance.to_s + " miles away ||" => @id}
   end
 
-  def puppy_bio #move to CLI?
+  def attach_color(color_input)
+    @color = Colors.create_color(color_input)
+  end
+
+  def attach_org(org_input) 
+    Org.create_org(org_input)
+    Org.all.first.instance_variables.each do |var|
+      self.instance_variable_set(var, Org.all.first.instance_variable_get(var))
+    end 
+  end
+
+  def puppy_bio 
     system "clear"
-    color_data = PupAPI.get_color_hash(color_id)    
-    org_data = PupAPI.get_org_hash(org_id)
+    self.attach_color(@color_id)
+    self.attach_org(@org_id)
     puts "***********************************************************************************************************************"
     puts "Hi, my name is #{@name}! Woof!"
     puts "I am a #{@breed}! I will grow into a #{@size} sized dog!" 
     puts "I am a #{@sex}!"
     puts "I am #{@age} old!"
-    if @color_id
-      puts "My color and markings are #{color_data[1]}!"
-    else puts "My color and markings are Unlisted"
-    end
-    puts "I am located in #{org_data[2]}, #{org_data[3]}, which is #{@distance} miles from you!" #resist urge to city/state
-    #puts "If a price was listed, I am available for #{pup_fee}"
+    puts "My color and markings are #{@color}!"
+    puts "I am located in #{@org_city}, #{@org_state}, which is #{@distance} miles from you!"
     puts "A little about me:"
     puts "#{@descrip}"
-    if @website
-      puts "You can find more information about me at: #{@website}"
-      else puts "Please visit #{org_data[5]} to find more information about me." # at least one puppy didn't have a website, but the rescue had one. i hope a puppy SOMEWHERE isn't lacking both.
-    end
-    puts "***********************************************************************************************************************"
-  end
-
-  def rescue_bio # will probably require a new class of Rescue
-    system "clear"
-    org_data = PupAPI.get_org_hash(org_id)
-    puts "***********************************************************************************************************************"
-    puts "Rescue Name: #{org_data[1]}" 
-    puts "Location: #{org_data[2]}, #{org_data[3]}"
-    puts "Email: #{org_data[4]}"
-    puts "Website: #{org_data[5]}"
-    puts "Adoption Process: #{org_data[6]}"
-    puts "Rescue Information: #{org_data[7].gsub("&nbsp", " ").gsub(/\n/," ").gsub("&#39;", "'").gsub(";","")}"
+    puts @website ? "You can find more information about me at: #{@website}" : "Please visit #{@org_site} to find more information about me."
     puts "***********************************************************************************************************************"
   end
 
