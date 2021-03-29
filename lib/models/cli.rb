@@ -1,5 +1,5 @@
 class CLi
-    attr_accessor :result_choice, :bio_choice, :org_choice, :zip_input, :rad_input, :filter_choice
+    attr_accessor :result_choice, :bio_choice, :org_choice, :zip_input, :rad_input, :sort_choice
     attr_reader :prompt
   
     def initialize
@@ -40,12 +40,36 @@ class CLi
         @result_choice = 
         @prompt.select("Here are #{Puppy.all.size} available puppies within #{rad_input} miles of #{zip_input} sorted by distance! \n Select a puppy to read more information about it! \n Scroll to the end to view additional options", Puppy.all.map{|pup| pup.to_pup_hash}, 
                         "Begin new Zip Code search", 
-                        'Filter results by Breed',
-                        'Filter results by Size',
-                        'Filter results by Rescue Organization',
+                        'Sort results by Breed',
+                        'Sort results by Size',
                         'Exit PupFind',
                         per_page: 10) 
         result_response
+    end
+
+    def org_filter_menu
+        @result_choice = 
+        @prompt.select("Please select from the puppies below, which are from the same rescue as your selection\n", send_pup.same_org.map{|pup| pup.to_pup_hash},
+                        'Exit PupFind',
+                        per_page: 10)
+        result_response
+    end
+    
+    def bio_menu
+        @bio_choice = @prompt.select("Please select from the following options\n", 
+        'Get more information about rescue',
+        'Find more puppies from this rescue', 
+        'Return to previous results', 
+        'Exit PupFind')
+        bio_response
+    end
+
+    def org_bio_menu
+        @org_choice = @prompt.select("Please select from the following options\n", 
+        'Return to selected puppy', 
+        'Return to previous results', 
+        'Exit PupFind')
+        org_response
     end
                         
     def result_response
@@ -54,32 +78,34 @@ class CLi
             Puppy.all.clear
             clear_screen
             startup
-        when 'Filter results by Breed' 
+        when 'Sort results by Breed' 
             breed_prompt
-        when 'Filter results by Size'
+        when 'Sort results by Size'
             size_prompt
         when 'Exit PupFind'
             quit_app
         else 
-            (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio 
-            bio_prompt 
+            set_choice
+            clear_screen
+            send_pup.puppy_bio 
+            bio_menu 
         end
-    end
-  
-    def bio_prompt
-        @bio_choice = @prompt.select("Please select from the following options\n", 
-        'Get more information about rescue', 
-        'Return to previous results', 
-        'Exit PupFind')
-        case bio_choice 
+    end    
+        
+    def bio_response
+        case @bio_choice 
         when 'Get more information about rescue'
-            if @filter_choice
-                @result_choice = @filter_choice 
-            end
+            set_choice
+            clear_screen
             Org.all.first.org_bio
-            org_prompt
+            org_bio_menu
+        when 'Find more puppies from this rescue'
+            set_choice
+            clear_screen
+            org_filter_menu
         when 'Return to previous results'
             Org.all.clear
+            set_choice
             clear_screen
             result_menu
         when 'Exit PupFind'
@@ -87,18 +113,16 @@ class CLi
         end
     end
 
-    def org_prompt
-        @org_choice = @prompt.select("Please select from the following options\n", 
-        'Return to selected puppy', 
-        'Return to previous results', 
-        'Exit PupFind')
-        case org_choice
+    def org_response
+        case @org_choice
         when 'Return to selected puppy'
+            set_choice
             clear_screen
-            (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio
-            bio_prompt
+            send_pup.puppy_bio
+            bio_menu
         when 'Return to previous results'
             Org.all.clear
+            set_choice
             clear_screen
             result_menu
         when 'Exit PupFind'
@@ -106,19 +130,29 @@ class CLi
         end
     end
     
-    def breed_prompt
-        @filter_choice = @prompt.select("Please select from the breeds below, sorted alphabetically\n", 
-                ((Puppy.all.map {|pup|pup.to_breed_hash}).sort_by {|breed| breed.first}), per_page: 10)
-        (Puppy.all.find {|pup| pup.id == @filter_choice}).puppy_bio
-        bio_prompt
+    def breed_prompt #can probably combine these three
+        @sort_choice = @prompt.select("Please select from the breeds below, sorted alphabetically\n", 
+            ((Puppy.all.map {|pup| pup.to_breed_hash}).sort_by {|breed| breed.first}), per_page: 10)
+        (Puppy.all.find {|pup| pup.id == @sort_choice}).puppy_bio
+        bio_menu
     end
 
     def size_prompt
-        @filter_choice = @prompt.select("Please select from the puppies below, sorted by size\n",
+        @sort_choice = @prompt.select("Please select from the puppies below, sorted by size\n",
             ((Puppy.all.map {|pup| pup.to_size_hash}).sort_by {|size| size.first}).reverse, per_page: 10)
-        (Puppy.all.find {|pup| pup.id == @filter_choice}).puppy_bio
-        bio_prompt
-    end                
+        (Puppy.all.find {|pup| pup.id == @sort_choice}).puppy_bio
+        bio_menu
+    end
+
+    def send_pup
+        Puppy.all.find {|pup| pup.id == @result_choice}
+    end
+
+    def set_choice
+        if @sort_choice
+            @result_choice = @sort_choice
+        end
+    end
 
     def clear_screen
         system "clear"

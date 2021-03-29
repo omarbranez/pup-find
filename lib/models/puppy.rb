@@ -1,5 +1,5 @@
 class Puppy
-  attr_accessor :id, :name, :breed, :age, :color_id, :sex, :size, :org_id, :descrip, :website, :distance, :org, :colors
+  attr_accessor :id, :name, :breed, :age, :color_id, :sex, :size, :org_id, :descrip, :website, :distance
   @@all = []
   
   def initialize(hash)
@@ -39,6 +39,10 @@ class Puppy
     {@size + " || " + @breed + " || " + @name + " || " + @sex + " || " + @age + " old || " + @distance.to_s + " miles away ||" => @id}
   end
 
+  def same_org
+    Puppy.all.select {|pup| pup.org_id == @org_id}
+  end
+
   def attach_color(color_input)
     @color = Colors.create_color(color_input)
   end
@@ -51,7 +55,6 @@ class Puppy
   end
 
   def puppy_bio 
-    system "clear"
     self.attach_color(@color_id)
     self.attach_org(@org_id)
     puts "***********************************************************************************************************************"
