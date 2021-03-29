@@ -85,7 +85,6 @@ class CLi
         when 'Exit PupFind'
             quit_app
         else 
-            set_choice
             clear_screen
             send_pup.puppy_bio 
             bio_menu 
@@ -95,17 +94,14 @@ class CLi
     def bio_response
         case @bio_choice 
         when 'Get more information about rescue'
-            set_choice
             clear_screen
             Org.all.first.org_bio
             org_bio_menu
         when 'Find more puppies from this rescue'
-            set_choice
             clear_screen
             org_filter_menu
         when 'Return to previous results'
             Org.all.clear
-            set_choice
             clear_screen
             result_menu
         when 'Exit PupFind'
@@ -117,13 +113,11 @@ class CLi
         case @org_choice
         when 'Return to selected puppy'
             Org.all.clear
-            set_choice
             clear_screen
             send_pup.puppy_bio
             bio_menu
         when 'Return to previous results'
             Org.all.clear
-            set_choice
             clear_screen
             result_menu
         when 'Exit PupFind'
@@ -134,14 +128,14 @@ class CLi
     def breed_prompt #can probably combine these three
         @result_choice = @prompt.select("Please select from the breeds below, sorted alphabetically\n", 
             ((Puppy.all.map {|pup| pup.to_breed_hash}).sort_by {|breed| breed.first}), per_page: 10)
-        (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio
+        send_pup.puppy_bio
         bio_menu
     end
 
     def size_prompt
         @result_choice = @prompt.select("Please select from the puppies below, sorted by size\n",
             ((Puppy.all.map {|pup| pup.to_size_hash}).sort_by {|size| size.first}).reverse, per_page: 10)
-        (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio
+        send_pup.puppy_bio
         bio_menu
     end
 
