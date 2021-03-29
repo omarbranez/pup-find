@@ -22,9 +22,9 @@ Or install it yourself as:
 
 ## Usage
 
-Simply enter your zip code and PupFind will extensively search through [RescueGroups'](https://rescuegroups.org/) database of affiliated animal rescues in the United States.
+Simply enter your zip code and how far you'd like to search, and PupFind will extensively search through [RescueGroups'](https://rescuegroups.org/) database of affiliated animal rescues in the United States.
 
-From there, you will receive a list of currently available puppies within 500 (note: will be changed to custom search scope) miles of your location. Follow the on-screen prompts to view more information about a particular puppy or to filter search results by various criteria. 
+From there, you will receive a list of currently available puppies within 500 miles of your location. Follow the on-screen prompts to view more information about a particular puppy, the rescue currently caring for it, or to sort search results by various criteria. 
 
 Happy searching!
 
