@@ -1,5 +1,5 @@
 class CLi
-    attr_accessor :result_choice, :bio_choice, :org_choice, :zip_input, :rad_input, :sort_choice
+    attr_accessor :result_choice, :bio_choice, :org_choice, :zip_input, :rad_input
     attr_reader :prompt
   
     def initialize
@@ -116,6 +116,7 @@ class CLi
     def org_response
         case @org_choice
         when 'Return to selected puppy'
+            Org.all.clear
             set_choice
             clear_screen
             send_pup.puppy_bio
@@ -131,27 +132,21 @@ class CLi
     end
     
     def breed_prompt #can probably combine these three
-        @sort_choice = @prompt.select("Please select from the breeds below, sorted alphabetically\n", 
+        @result_choice = @prompt.select("Please select from the breeds below, sorted alphabetically\n", 
             ((Puppy.all.map {|pup| pup.to_breed_hash}).sort_by {|breed| breed.first}), per_page: 10)
-        (Puppy.all.find {|pup| pup.id == @sort_choice}).puppy_bio
+        (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio
         bio_menu
     end
 
     def size_prompt
-        @sort_choice = @prompt.select("Please select from the puppies below, sorted by size\n",
+        @result_choice = @prompt.select("Please select from the puppies below, sorted by size\n",
             ((Puppy.all.map {|pup| pup.to_size_hash}).sort_by {|size| size.first}).reverse, per_page: 10)
-        (Puppy.all.find {|pup| pup.id == @sort_choice}).puppy_bio
+        (Puppy.all.find {|pup| pup.id == @result_choice}).puppy_bio
         bio_menu
     end
 
     def send_pup
         Puppy.all.find {|pup| pup.id == @result_choice}
-    end
-
-    def set_choice
-        if @sort_choice
-            @result_choice = @sort_choice
-        end
     end
 
     def clear_screen
